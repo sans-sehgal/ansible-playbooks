@@ -1,0 +1,52 @@
+  - name: install apache2 package
+    tags: apache, ubuntu, php
+    apt:
+      name:
+        - "{{ apache_package_name_ubuntu  }}"
+        - "{{ php_package_name_ubuntu }}"
+
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install apache2 package for CentOS
+    tags: https, centos, php
+    dnf:
+      name:
+
+        - "{{ apache_package_name_centos }}"
+        - "{{ php_package_name_centos }}"
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: copy default html files to server
+    tags: apache, ubuntu, copy httpd
+    copy:
+     src: files/landing_page.html
+     dest: /var/www/html/index.html
+     owner: root
+     group: root
+     mode: '0777'
+
+  - name: start apache2 service for Ubuntu
+    tags: ubuntu, apache2, start
+    service:
+      name: "{{ apache_package_name_ubuntu }}"
+      state: started
+      enabled: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Change timeout for Apache2 on Ubuntu
+    tags: timeout, ubuntu
+    lineinfile:
+      path: /etc/apache2/apache2.conf
+      regexp: '^Timeout'
+      line: Timeout 205
+    when: ansible_distribution == "Ubuntu"
+    register: apache2_change
+
+  - name: restart apache2 after change
+    tags: timeout, ubuntu
+    service:
+      name: "{{ apache_package_name_ubuntu }}"
+      state: restarted
+    when: apache2_change.changed

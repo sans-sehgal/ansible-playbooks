@@ -1,0 +1,9 @@
+
+  - name: install mariadb ubuntu
+    tags: mariadb, ubuntu
+    apt:
+      name: mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+

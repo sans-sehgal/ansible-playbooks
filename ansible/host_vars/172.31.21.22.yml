@@ -1,0 +1,6 @@
+apache_package_name_ubuntu: apache2
+apache_service: apache2
+php_package_name_ubuntu: libapache2-mod-php
+
+apache_package_name_centos: httpd
+php_package_name_centos: php 

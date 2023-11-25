@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update machine cache ubuntu
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false     
+    when: ansible_distribution == "Ubuntu"
+
+  - name: update machine cache centos
+    dnf:
+      update_cache: yes
+      update_only: yes
+    changed_when: false
+    when: ansible_distribution == "CentOS"
+
+- hosts: web01
+  become: true
+  roles:
+    - webservers
+
+- hosts: db01
+  become: true
+  roles:
+    - databases
+
+- hosts: file01
+  become: true
+  roles:
+    - fileservers
+
+- hosts: all
+  become: true
+  roles: 
+    - base

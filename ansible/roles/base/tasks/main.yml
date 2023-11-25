@@ -1,0 +1,12 @@
+  - name: add user
+    tags: user, ubuntu
+    user:
+      name: sanskar
+      ssh_key_file: tween-dev.pem
+      groups: root
+
+  - name: add sudoers file for user
+    tags: user, ubuntu, sudoers
+    copy:
+      src: files/sudoer_file
+      dest: /etc/sudoers.d/sanskar

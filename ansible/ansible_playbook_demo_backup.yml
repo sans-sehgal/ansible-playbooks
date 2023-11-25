@@ -1,0 +1,114 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update machine cache ubuntu
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false     
+    when: ansible_distribution == "Ubuntu"
+
+  - name: update machine cache centos
+    dnf:
+      update_cache: yes
+      update_only: yes
+    changed_when: false
+    when: ansible_distribution == "CentOS"
+
+- hosts: web01
+  become: true
+  tasks:
+
+  - name: install apache2 package
+    tags: apache, ubuntu, php
+    apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install apache2 package for CentOS
+    tags: https, centos, php
+    dnf:
+      name: 
+      
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: copy default html files to server
+    tags: apache, ubuntu, copy httpd
+    copy:
+     src: files/landing_page.html
+     dest: /var/www/html/index.html
+     owner: root
+     group: root
+     mode: '0777'
+
+  - name: start apache2 service for Ubuntu
+    tags: ubuntu, apache2, start
+    service: 
+      name: apache2
+      state: started
+      enabled: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Change timeout for Apache2 on Ubuntu
+    tags: timeout, ubuntu
+    lineinfile:
+      path: /etc/apache2/apache2.conf
+      regexp: '^Timeout'
+      line: Timeout 205
+    when: ansible_distribution == "Ubuntu"
+    register: apache2_change
+
+  - name: restart apache2 after change
+    tags: timeout, ubuntu
+    service: 
+      name: apache2
+      state: restarted
+    when: apache2_change.changed
+
+- hosts: db01
+  become: true
+  tasks: 
+  
+  - name: install mariadb ubuntu
+    tags: mariadb, ubuntu
+    apt:
+      name: mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file01
+  become: true
+  tasks:
+
+  - name: install samba on ubuntu
+    tags: samba, ubuntu
+    apt:
+      name: samba
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add user
+    tags: user, ubuntu
+    user:
+      name: sanskar
+      ssh_key_file: tween-dev.pem
+      groups: root
+  
+  - name: add sudoers file for user
+    tags: user, ubuntu, sudoers
+    copy:
+      src: files/sudoer_file
+      dest: /etc/sudoers.d/sanskar
