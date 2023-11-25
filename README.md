@@ -31,7 +31,7 @@ This repository contains Ansible playbooks for automating various tasks on diffe
 
    ```bash
    ansible-playbook -i inventory <playbook_name>.yml
-  ```
+   ```
 
 ## License
 
